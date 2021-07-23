@@ -1,0 +1,17 @@
+
+{% extends 'tweets/bootstrap.html' %}
+
+{% load django_bootstrap5 %}
+
+{% block bootstrap5_title %}{% block title %}TweetMe!{% endblock %}{% endblock %}
+
+{% block bootstrap5_content %}
+
+{% include "components/navbar.html" %}
+<div class="container-fluid">
+
+{% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
+
+{% block content %}(no content){% endblock %}
+</div>
+{% endblock %}
