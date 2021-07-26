@@ -24,6 +24,23 @@
 
 <script>
 
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+
     function handleTweetFormError(msg, display) {
         var myErrorDiv = document.getElementById("tweet-create-form-error")
         if (display === true) {
@@ -78,6 +95,9 @@
             } else if (xhr.status === 401) {
                 alert("You must login!")
                 window.location.href = "/login"
+            } else if (xhr.status === 403) {
+                alert("You must login!")
+                window.location.href = "/login"
             }
         }
         xhr.onerror = function () {
@@ -93,7 +113,7 @@
     tweetCreateFormEl.addEventListener("submit", handleTweetCreateFormDidSubmit)
 
     function loadTweets(tweetsElement) {
-         const xhr = new XMLHttpRequest()
+        const xhr = new XMLHttpRequest()
         const method = 'GET'
         const url = "/tweets"
         const responseType = "json"
@@ -102,7 +122,7 @@
         xhr.open(method, url)
         xhr.onload = function () {
             const serverResponse = xhr.response
-            let listedItems = serverResponse.response
+            let listedItems = serverResponse
             var finalTweetStr = ""
             for (var i = 0; i < listedItems.length; i++) {
                 var tweetObj = listedItems[i]
@@ -118,7 +138,23 @@
 
     function handleDidLike(tweet_id, currentCount) {
         console.log(tweet_id, currentCount)
-        currentCount++
+        const url = "/api/tweets/action"
+        const method = "POST"
+        const data = JSON.stringify({
+            id: tweet_id,
+            action: "like"
+        })
+        const csrftoken = getCookie('csrftoken');
+        const xhr = new XMLHttpRequest()
+        xhr.open(method, url)
+        xhr.setRequestHeader("Content-Type", "application/json")
+        xhr.setRequestHeader("HTTP_X_REQUESTED_WITH", "XMLHttpRequest")
+        xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest")
+        xhr.setRequestHeader("X-CSRFToken", csrftoken)
+        xhr.onload = function () {
+            console.log(xhr.status, xhr.response)
+        }
+        xhr.send(data)
         return
     }
 
